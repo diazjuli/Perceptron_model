@@ -34,3 +34,34 @@ def k_fold_dataset(wine_data, k, shuffle=False):
         datasets.append((wine_data.drop(validation_set.index), validation_set))
 
     return datasets
+
+
+def validate_model(adaline, wine_data, k, num_epochs=300, learning_rate=0.001):
+    """
+    This function will first generate a k-fold cross-validation dataset of wine_data.
+    Then we will train our dataset on each fold's training set and test our model on the validation set.
+    We will save the accuracy for each fold.
+    Finally we return the mean of the accuracies.
+
+    :param adaline: Adaline model
+    :param wine_data: Pandas dataframe that we want to model
+    :param k: int: specifies how many folds we want to use for our k-folds cross validation
+    :param num_epochs: int: the number of epochs that we want to train our data for
+    :param learning_rate: specifies the learning rate for our Adaline model
+    :return:
+    """
+
+    k_fold_sets = k_fold_dataset(wine_data, k, True)
+    accuracy = []
+
+    for fold in k_fold_sets:
+        X = fold[0].loc[:, ['pH', 'alcohol']]
+        X = X.values[:]
+        labels = fold[0].loc[:, 'label']
+        adaline.train(X, labels, num_epochs, learning_rate, False)
+        accuracy.append(adaline.validate_weights(fold[1].loc[:, ['pH', 'alcohol']].as_matrix(), fold[1].loc[:, 'label']))
+        print('model accuracy: {}'.format(accuracy[-1]))
+
+    print('Mean model accuracy: {} - {} folds, lr: {}, num_epochs: {}'.format(sum(accuracy) / len(accuracy), k,
+                                                                              learning_rate, num_epochs))
+    return sum(accuracy) / len(accuracy)
