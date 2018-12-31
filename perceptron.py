@@ -1,7 +1,5 @@
 import random
-import math
-import pandas as pd
-from sommelier import dot_product
+from math import dot_product
 
 
 class Perceptron:
@@ -79,3 +77,20 @@ class Perceptron:
             epoch += 1
 
         return self.performance
+
+
+def scale_dataframe_inputs(data):
+    """
+    This function takes a pandas dataframe as a parameter and normalizes its input values
+    so that they are between -1 and 1
+
+    :param data: pandas dataframe
+    :return: pandas dataframe:
+    """
+
+    for col in data.columns:
+        if col != 'label' and col != 'quality':
+            values = data[col].values[:]
+            values = (values - values.mean()) / (values.max() - values.min())
+            data[col].values[:] = values
+    return data
